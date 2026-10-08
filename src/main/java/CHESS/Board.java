@@ -114,8 +114,19 @@ public class Board {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                selectedPiece.move(e.getX()/64,e.getY()/64);
+                int xp = e.getX() / 64;
+                int yp = e.getY() / 64;
+
+                if (selectedPiece != null && selectedPiece.canmove(xp, yp)) {
+                    selectedPiece.move(xp, yp);
+                } else {
+                    // back to original square
+                    selectedPiece.x = selectedPiece.xp * 64;
+                    selectedPiece.y = selectedPiece.yp * 64;
+                }
+
                 board.repaint();
+                
             }
 
             @Override

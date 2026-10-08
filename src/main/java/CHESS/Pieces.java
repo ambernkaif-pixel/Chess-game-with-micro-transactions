@@ -68,8 +68,36 @@ public class Pieces {
         ps.remove(this);
     }
     public boolean canmove(int xp,int yp){
+        
+
+    if (!withinboard(xp, yp)) return false;
+
+        // KING MOVEMENT
+        if (name.equals("King")) {
+
+            int dx = Math.abs(xp - this.xp);
+            int dy = Math.abs(yp - this.yp);
+
+            // King moves one square in any direction
+            if (dx <= 1 && dy <= 1 && !(dx == 0 && dy == 0)) {
+
+                Pieces target = Board.getPiece(xp * 64, yp * 64);
+
+                // Cannot capture own piece
+                if (target != null && target.white == this.white) {
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         return false;
     }
+
+    
     public boolean withinboard(int xp,int yp){
         if(xp>=0 && xp<=7 && yp>=0 && yp<=7){
             return true;
