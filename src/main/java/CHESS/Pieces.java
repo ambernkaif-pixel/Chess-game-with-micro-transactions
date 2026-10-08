@@ -93,8 +93,98 @@ public class Pieces {
 
             return false;
         }
+        if (name.equals("Knight")){
+            if (!withinboard(xp, yp)) return false;
+            // knight can move if its movement ratio is 1:2 or 2:1
+            if(Math.abs(xp-this.xp) * Math.abs(yp-this.yp) == 2){
+                Pieces target = Board.getPiece(xp*64,yp*64);
+                
+                if (target != null && target.white == this.white) {
+                    return false;
+                }
 
-        return false;
+                return true;
+            }
+            return false;
+        }
+        if (name.equals("Rook")){
+            if (!withinboard(xp, yp)) return false;
+            // rook can move either the full row or the full column
+            if(xp == this.xp || yp == this.yp){
+                Pieces target = Board.getPiece(xp*64,yp*64);
+                
+                if (target != null && target.white == this.white) {
+                    return false;
+                }
+
+                return true;
+            }
+            return false;
+        }
+
+        
+       if (name.equals("Bishop")){
+            if (!withinboard(xp, yp)) return false;
+            if(Math.abs(xp-this.xp) == Math.abs(yp-this.yp)){
+                Pieces target = Board.getPiece(xp*64,yp*64);
+                
+                if (target != null && target.white == this.white) {
+                    return false;
+                }
+
+                return true;
+            }
+            return false;
+        }
+       if (name.equals("Queen")){
+            if (!withinboard(xp, yp)) return false;
+            if(xp == this.xp || yp == this.yp){
+                Pieces target = Board.getPiece(xp*64,yp*64);
+                
+                if (target != null && target.white == this.white) {
+                    return false;
+                }
+
+                return true;
+            }
+            if(Math.abs(xp-this.xp) == Math.abs(yp-this.yp)){
+                Pieces target = Board.getPiece(xp*64,yp*64);
+                
+                if (target != null && target.white == this.white) {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+       if (name.equals("Pawn")){
+            if (!withinboard(xp, yp)) return false;
+            int moveValue = white ? -1 :1;
+            int frontX = this.xp;
+            int frontY = this.yp + moveValue;
+            Pieces target = Board.getPiece(xp*64,yp*64);
+            Pieces frontPiece = Board.getPiece(frontX * 64, frontY * 64);
+            if (xp == this.xp && yp == this.yp + moveValue && frontPiece == null){
+                return true;
+            }
+            int startRank = white ? 6 : 1;
+
+            if (this.yp == startRank && xp == this.xp && yp == this.yp + 2 * moveValue) {
+
+                Pieces front1 = Board.getPiece(this.xp * 64, (this.yp + moveValue) * 64);
+                Pieces front2 = Board.getPiece(this.xp * 64, (this.yp + 2 * moveValue) * 64);
+
+                if (front1 == null && front2 == null) {
+                    return true;
+                }
+            }
+            if(Math.abs(xp-this.xp) == 1 && yp == this.yp + moveValue && target != null && target.white != this.white){
+                return true;
+            }
+
+        }
+       
+       return false;
     }
 
     
