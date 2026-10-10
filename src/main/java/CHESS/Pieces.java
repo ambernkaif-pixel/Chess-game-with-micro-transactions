@@ -63,6 +63,7 @@ public class Pieces {
         this.yp=yp;
         x=xp*64;
         y=yp*64;
+        Board.currentPlayer= 1- Board.currentPlayer;
     }
     public void kill(){
         ps.remove(this);
@@ -71,6 +72,11 @@ public class Pieces {
         
 
     if (!withinboard(xp, yp)) return false;
+    if ((white && Board.currentPlayer != 1) ||
+    (!white && Board.currentPlayer != 0)) {
+        return false;
+    }
+
 
         // KING MOVEMENT
         if (name.equals("King")) {
@@ -80,6 +86,13 @@ public class Pieces {
 
             // King moves one square in any direction
             if (dx <= 1 && dy <= 1 && !(dx == 0 && dy == 0)) {
+                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
+                if (thisPiece.white==true){
+                    int w= 1;
+                }
+                else{
+                    int w=0;
+                }
 
                 Pieces target = Board.getPiece(xp * 64, yp * 64);
 
@@ -97,6 +110,13 @@ public class Pieces {
             if (!withinboard(xp, yp)) return false;
             // knight can move if its movement ratio is 1:2 or 2:1
             if(Math.abs(xp-this.xp) * Math.abs(yp-this.yp) == 2){
+                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
+                if (thisPiece.white==true){
+                    int w= 1;
+                }
+                else{
+                    int w=0;
+                }
                 Pieces target = Board.getPiece(xp*64,yp*64);
                 
                 if (target != null && target.white == this.white) {
@@ -111,6 +131,13 @@ public class Pieces {
             if (!withinboard(xp, yp)) return false;
             // rook can move either the full row or the full column
             if(xp == this.xp || yp == this.yp){
+                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
+                if (thisPiece.white==true){
+                    int w= 1;
+                }
+                else{
+                    int w=0;
+                }
                 Pieces target = Board.getPiece(xp*64,yp*64);
                 
                 if (target != null && target.white == this.white) {
@@ -126,6 +153,13 @@ public class Pieces {
        if (name.equals("Bishop")){
             if (!withinboard(xp, yp)) return false;
             if(Math.abs(xp-this.xp) == Math.abs(yp-this.yp)){
+                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
+                if (thisPiece.white==true){
+                    int w= 1;
+                }
+                else{
+                    int w=0;
+                }
                 Pieces target = Board.getPiece(xp*64,yp*64);
                 
                 if (target != null && target.white == this.white) {
@@ -139,6 +173,13 @@ public class Pieces {
        if (name.equals("Queen")){
             if (!withinboard(xp, yp)) return false;
             if(xp == this.xp || yp == this.yp){
+                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
+                if (thisPiece.white==true){
+                    int w= 1;
+                }
+                else{
+                    int w=0;
+                }
                 Pieces target = Board.getPiece(xp*64,yp*64);
                 
                 if (target != null && target.white == this.white) {
@@ -148,6 +189,13 @@ public class Pieces {
                 return true;
             }
             if(Math.abs(xp-this.xp) == Math.abs(yp-this.yp)){
+                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
+                if (thisPiece.white==true){
+                    int w= 1;
+                }
+                else{
+                    int w=0;
+                }
                 Pieces target = Board.getPiece(xp*64,yp*64);
                 
                 if (target != null && target.white == this.white) {
@@ -164,6 +212,13 @@ public class Pieces {
             int frontY = this.yp + moveValue;
             Pieces target = Board.getPiece(xp*64,yp*64);
             Pieces frontPiece = Board.getPiece(frontX * 64, frontY * 64);
+            Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
+                if (thisPiece.white==true){
+                    int w= 1;
+                }
+                else{
+                    int w=0;
+                }
             if (xp == this.xp && yp == this.yp + moveValue && frontPiece == null){
                 return true;
             }
@@ -186,7 +241,15 @@ public class Pieces {
        
        return false;
     }
-
+    private void changePlayer(int w){
+        if (w == 1){
+            w=0;
+        }
+        else{
+            w=1;
+        }
+        
+    }
     
     public boolean withinboard(int xp,int yp){
         if(xp>=0 && xp<=7 && yp>=0 && yp<=7){

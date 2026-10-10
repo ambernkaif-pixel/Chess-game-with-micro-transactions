@@ -11,6 +11,7 @@ import java.util.LinkedList;
  * @author amber
  */
 public class Board {
+    public static int currentPlayer = 1; // white starts
     public  static LinkedList<Pieces> ps = new LinkedList<>();
     public static Pieces selectedPiece = null;
     public static void main(String[] args){
