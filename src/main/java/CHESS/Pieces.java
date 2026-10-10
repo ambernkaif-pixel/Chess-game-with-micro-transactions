@@ -18,6 +18,7 @@ public class Pieces {
     LinkedList <Pieces> ps;
     String name;
     boolean hasMoved=false;
+    boolean twosteps=false;
     Image img;
     public Pieces(int xp, int yp,String n, boolean white,LinkedList<Pieces> ps) {
         this.xp = xp;
@@ -50,6 +51,31 @@ public class Pieces {
     }
         
     public void move(int xp,int yp){
+        int oldXP = this.xp;
+        int oldYP = this.yp;
+            if (name.equals("Pawn") && Board.enPassantTarget != null) {
+
+            // White pawn
+            if (white &&
+                xp == Board.enPassantTarget.xp &&
+                yp == oldYP - 1 &&                 // moves one up
+                Board.enPassantTarget.yp == oldYP // target pawn is beside
+
+            ) {
+                Board.enPassantTarget.kill();
+            }
+
+            // Black pawn
+            if (!white &&
+                xp == Board.enPassantTarget.xp &&
+                yp == oldYP + 1 &&                 // moves one down
+                Board.enPassantTarget.yp == oldYP  // target pawn is beside
+
+            ) {
+                Board.enPassantTarget.kill();
+            }
+        }
+
             // CASTLING CHECK BEFORE UPDATING KING POSITION
             if (name.equals("King") && !this.hasMoved) {
 
@@ -77,6 +103,14 @@ public class Pieces {
             }
         }
     }
+            Pieces target = Board.getPiece(xp*64,yp*64);
+            if(target != null){
+            if (target.white != white){
+                target.kill();
+            } else {
+                return;
+            }
+            }
         if(Board.getPiece(xp*64,yp*64)!=null){
             if (Board.getPiece(xp*64,yp*64).white != white){
             Board.getPiece(xp*64, yp*64).kill();
@@ -92,6 +126,12 @@ public class Pieces {
         x=xp*64;
         y=yp*64;
         this.hasMoved= true;
+        if (name.equals("Pawn") && Math.abs(yp - oldYP) == 2) {
+        Board.enPassantTarget = this;
+    } else {
+        // CLEAR ONLY IF NOT A DOUBLE MOVE
+        Board.enPassantTarget = null;
+    }
 
         Board.currentPlayer= 1- Board.currentPlayer;
     }
@@ -276,12 +316,35 @@ public class Pieces {
             Pieces target = Board.getPiece(xp*64,yp*64);
             Pieces frontPiece = Board.getPiece(frontX * 64, frontY * 64);
             Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
-                if (thisPiece.white==true){
+            if (thisPiece.white==true){
                     int w= 1;
                 }
-                else{
+            else{
                     int w=0;
                 }
+                        // EN PASSANT CHECK
+            if (Board.enPassantTarget != null) {
+
+                // The en-passant pawn must be next to me horizontally
+                if (Board.enPassantTarget.yp == this.yp &&
+                    Math.abs(Board.enPassantTarget.xp - this.xp) == 1) {
+
+                    // White pawn moves upward
+                    if (white && xp == Board.enPassantTarget.xp &&
+                        yp == this.yp - 1) {
+                        return true;
+                    }
+
+                    // Black pawn moves downward
+                    if (!white && xp == Board.enPassantTarget.xp &&
+                        yp == this.yp + 1) {
+                        return true;
+                    }
+                }
+            }
+
+
+
             if (xp == this.xp && yp == this.yp + moveValue && frontPiece == null){
                 return true;
             }
@@ -320,13 +383,7 @@ public class Pieces {
         }
         return false;
     }
-    //public class king extends Pieces {
-//        public boolean canmove(int xp, int yp){
-//            if(withinboard(xp,yp)){
-//                if(Math.abs(xp-this.xp))
-//            }
-//        }
-           
-    //}
+    
+
      
 }

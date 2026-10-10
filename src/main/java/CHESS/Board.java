@@ -12,9 +12,11 @@ import java.util.LinkedList;
  */
 public class Board {
     public static int currentPlayer = 1; // white starts
+    public static Pieces enPassantTarget = null;
     public  static LinkedList<Pieces> ps = new LinkedList<>();
     public static Pieces selectedPiece = null;
     public static void main(String[] args){
+
         
         // WHITE PIECES
         new Pieces(0, 6, "Pawn", true, ps);
