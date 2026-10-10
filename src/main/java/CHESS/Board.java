@@ -59,6 +59,7 @@ public class Board {
         JFrame board = new JFrame();
         board.setBounds(10,10,512,512);//seting board
         board.setUndecorated(true);
+        board.setLayout(new BorderLayout());
         JPanel panel = new JPanel(){
             @Override
             public void paint(Graphics g){
@@ -83,7 +84,9 @@ public class Board {
              
             }
             
+            
         };
+        board.add(panel, BorderLayout.CENTER);
         //adding panels to board
         board.add(panel);
         board.addMouseMotionListener(new MouseMotionListener() {

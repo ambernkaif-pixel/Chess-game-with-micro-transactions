@@ -17,6 +17,7 @@ public class Pieces {
     boolean white;
     LinkedList <Pieces> ps;
     String name;
+    boolean hasMoved=false;
     Image img;
     public Pieces(int xp, int yp,String n, boolean white,LinkedList<Pieces> ps) {
         this.xp = xp;
@@ -49,6 +50,33 @@ public class Pieces {
     }
         
     public void move(int xp,int yp){
+            // CASTLING CHECK BEFORE UPDATING KING POSITION
+            if (name.equals("King") && !this.hasMoved) {
+
+            // King-side castling
+            if (xp == this.xp + 2) {
+            Pieces rook = Board.getPiece((this.xp + 3) * 64, this.yp * 64);
+            if (rook != null && rook.name.equals("Rook") && !rook.hasMoved) {
+                rook.xp = this.xp + 1;
+                rook.yp = this.yp;
+                rook.x = rook.xp * 64;
+                rook.y = rook.yp * 64;
+                rook.hasMoved = true;
+            }
+        }
+
+            // Queen-side castling
+            if (xp == this.xp - 2) {
+            Pieces rook = Board.getPiece((this.xp - 4) * 64, this.yp * 64);
+            if (rook != null && rook.name.equals("Rook") && !rook.hasMoved) {
+                rook.xp = this.xp - 1;
+                rook.yp = this.yp;
+                rook.x = rook.xp * 64;
+                rook.y = rook.yp * 64;
+                rook.hasMoved = true;
+            }
+        }
+    }
         if(Board.getPiece(xp*64,yp*64)!=null){
             if (Board.getPiece(xp*64,yp*64).white != white){
             Board.getPiece(xp*64, yp*64).kill();
@@ -63,6 +91,8 @@ public class Pieces {
         this.yp=yp;
         x=xp*64;
         y=yp*64;
+        this.hasMoved= true;
+
         Board.currentPlayer= 1- Board.currentPlayer;
     }
     public void kill(){
@@ -83,6 +113,39 @@ public class Pieces {
 
             int dx = Math.abs(xp - this.xp);
             int dy = Math.abs(yp - this.yp);
+            // CASTLING
+            if (!hasMoved && yp == this.yp) {
+
+                // King-side castling (short)
+                if (xp == this.xp + 2) {
+                    Pieces rook = Board.getPiece((this.xp + 3) * 64, this.yp * 64);
+
+                    if (rook != null && rook.name.equals("Rook") && !rook.hasMoved) {
+
+                        // Check squares between king and rook
+                        if (Board.getPiece((this.xp + 1) * 64, this.yp * 64) == null &&
+                            Board.getPiece((this.xp + 2) * 64, this.yp * 64) == null) {
+
+                            return true; // Castling allowed
+                        }
+                    }
+                }
+
+                // Queen-side castling (long)
+                if (xp == this.xp - 2) {
+                    Pieces rook = Board.getPiece((this.xp - 4) * 64, this.yp * 64);
+
+                    if (rook != null && rook.name.equals("Rook") && !rook.hasMoved) {
+
+                        if (Board.getPiece((this.xp - 1) * 64, this.yp * 64) == null &&
+                            Board.getPiece((this.xp - 2) * 64, this.yp * 64) == null &&
+                            Board.getPiece((this.xp - 3) * 64, this.yp * 64) == null) {
+
+                            return true;
+                        }
+                    }
+                }
+            }
 
             // King moves one square in any direction
             if (dx <= 1 && dy <= 1 && !(dx == 0 && dy == 0)) {
