@@ -15,6 +15,10 @@ public class Board {
     public static Pieces enPassantTarget = null;
     public  static LinkedList<Pieces> ps = new LinkedList<>();
     public static Pieces selectedPiece = null;
+    public static void drawString(Graphics g, String text, int x, int y) {
+        g.drawString(text, x, y);
+    }
+
     public static void main(String[] args){
 
         
@@ -82,6 +86,13 @@ public class Board {
                 for (Pieces p : ps) {
                     g.drawImage(p.img, p.x, p.y, 64, 64, null);
                 }
+                if (Board.selectedPiece != null && Board.selectedPiece.promotion) {
+                Board.drawString(g, "Promote to:", 520, 50);
+
+                for (Pieces option : Board.selectedPiece.promoPiece) {
+                    g.drawImage(option.img, option.x, option.y, 64, 64, null);
+                    }   
+                }
 
              
             }
@@ -120,20 +131,43 @@ public class Board {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                int xp = e.getX() / 64;
-                int yp = e.getY() / 64;
+                int mx = e.getX();
+                int my = e.getY();
+
+                // PROMOTION MODE
+                if (Board.selectedPiece != null && Board.selectedPiece.promotion) {
+
+                    for (Pieces option : Board.selectedPiece.promoPiece) {
+                        if (mx >= option.x && mx < option.x + 64 &&
+                            my >= option.y && my < option.y + 64) {
+
+                            Board.selectedPiece.promoteTo(option);
+
+                            Board.selectedPiece.promotion = false;
+                            Board.selectedPiece.promoPiece.clear();
+
+                            board.repaint();
+                            return;  // STOP — do NOT move anything
+                        }
+                    }
+
+                    return; // ignore clicks outside menu
+                }
+
+                // NORMAL MOVE
+                int xp = mx / 64;
+                int yp = my / 64;
 
                 if (selectedPiece != null && selectedPiece.canmove(xp, yp)) {
                     selectedPiece.move(xp, yp);
                 } else {
-                    // back to original square
                     selectedPiece.x = selectedPiece.xp * 64;
                     selectedPiece.y = selectedPiece.yp * 64;
                 }
 
                 board.repaint();
-                
             }
+
 
             @Override
             public void mouseEntered(MouseEvent e) {

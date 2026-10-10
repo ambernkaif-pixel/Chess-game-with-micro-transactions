@@ -1,7 +1,9 @@
 
 package CHESS;
 
+import static CHESS.Board.ps;
 import java.awt.Image;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.*;
 
@@ -19,6 +21,8 @@ public class Pieces {
     String name;
     boolean hasMoved=false;
     boolean twosteps=false;
+    public ArrayList <Pieces> promoPiece = new ArrayList<>();
+    public boolean promotion;
     Image img;
     public Pieces(int xp, int yp,String n, boolean white,LinkedList<Pieces> ps) {
         this.xp = xp;
@@ -49,7 +53,38 @@ public class Pieces {
 
         img = new ImageIcon(url).getImage();
     }
+    private boolean canPromote(){
+        if(!name.equals("Pawn")) return false;
+        if(white && this.yp==0){
+                promotion = true;
+                return true;
+            }
+        if(!white && this.yp==7){
+                promotion=true;
+                return true;
+            }
+        return false;
+       }
         
+        
+     
+    public void promoteTo(Pieces newPiece) {
+        // Set board coordinates
+        newPiece.xp = this.xp;
+        newPiece.yp = this.yp;
+
+        // Convert board coords → pixel coords
+        newPiece.x = newPiece.xp * 64;
+        newPiece.y = newPiece.yp * 64;
+
+        // Replace pawn with new piece
+        ps.remove(this);
+        ps.add(newPiece);
+
+        promotion = false;
+    }
+
+
     public void move(int xp,int yp){
         int oldXP = this.xp;
         int oldYP = this.yp;
@@ -126,6 +161,31 @@ public class Pieces {
         x=xp*64;
         y=yp*64;
         this.hasMoved= true;
+        
+        if (canPromote()){
+            promotion = true;
+        }
+        if (promotion) {
+            promoPiece.clear();
+            Pieces q = new Pieces(-1, -1, "Queen", this.white, new LinkedList<>());
+            q.x = 400; q.y = 50;
+
+            Pieces r = new Pieces(-1, -1, "Rook", this.white, new LinkedList<>());
+            r.x = 400; r.y = 120;
+
+            Pieces b = new Pieces(-1, -1, "Bishop", this.white, new LinkedList<>());
+            b.x = 400; b.y = 190;
+
+            Pieces k = new Pieces(-1, -1, "Knight", this.white, new LinkedList<>());
+            k.x = 400; k.y = 260;
+
+            promoPiece.add(q);
+            promoPiece.add(r);
+            promoPiece.add(b);
+            promoPiece.add(k);
+        }
+
+        
         if (name.equals("Pawn") && Math.abs(yp - oldYP) == 2) {
         Board.enPassantTarget = this;
     } else {
@@ -140,7 +200,7 @@ public class Pieces {
     }
     public boolean canmove(int xp,int yp){
         
-
+    
     if (!withinboard(xp, yp)) return false;
     if ((white && Board.currentPlayer != 1) ||
     (!white && Board.currentPlayer != 0)) {
@@ -367,16 +427,6 @@ public class Pieces {
        
        return false;
     }
-    private void changePlayer(int w){
-        if (w == 1){
-            w=0;
-        }
-        else{
-            w=1;
-        }
-        
-    }
-    
     public boolean withinboard(int xp,int yp){
         if(xp>=0 && xp<=7 && yp>=0 && yp<=7){
             return true;
