@@ -199,9 +199,11 @@ public class Pieces {
         ps.remove(this);
     }
     public boolean canmove(int xp,int yp){
-        
+     
     
     if (!withinboard(xp, yp)) return false;
+        
+    
     if ((white && Board.currentPlayer != 1) ||
     (!white && Board.currentPlayer != 0)) {
         return false;
@@ -213,6 +215,21 @@ public class Pieces {
 
             int dx = Math.abs(xp - this.xp);
             int dy = Math.abs(yp - this.yp);
+            // simulate king move
+            int oldXP = this.xp;
+            int oldYP = this.yp;
+
+            this.xp = xp;
+            this.yp = yp;
+
+            boolean illegal = isIllegal(this, xp, yp);
+
+
+            
+            this.xp = oldXP;
+            this.yp = oldYP;
+
+            if (illegal) return false;
             // CASTLING
             if (!hasMoved && yp == this.yp) {
 
@@ -290,84 +307,108 @@ public class Pieces {
             }
             return false;
         }
-        if (name.equals("Rook")){
+        if (name.equals("Rook")) {
             if (!withinboard(xp, yp)) return false;
-            // rook can move either the full row or the full column
-            if(xp == this.xp || yp == this.yp){
-                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
-                if (thisPiece.white==true){
-                    int w= 1;
-                }
-                else{
-                    int w=0;
-                }
-                Pieces target = Board.getPiece(xp*64,yp*64);
-                
-                if (target != null && target.white == this.white) {
-                    return false;
-                }
 
-                return true;
-            }
-            return false;
+            if (xp == this.xp) {
+                int step = yp > this.yp ? 1 : -1;
+                for (int y = this.yp + step; y != yp; y += step) {
+                    if (Board.getPiece(this.xp * 64, y * 64) != null) return false;
+                }
+            } else if (yp == this.yp) {
+                int step = xp > this.xp ? 1 : -1;
+                for (int x = this.xp + step; x != xp; x += step) {
+                   Pieces block = Board.getPiece(x * 64, this.yp * 64);
+                   if (block != null) return false;
+
+                }
+            } else return false;
+
+            Pieces target = Board.getPiece(xp * 64, yp * 64);
+            if (target != null && target.white == this.white) return false;
+
+            return true;
         }
+
 
         
-       if (name.equals("Bishop")){
+       if (name.equals("Bishop")) {
             if (!withinboard(xp, yp)) return false;
-            if(Math.abs(xp-this.xp) == Math.abs(yp-this.yp)){
-                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
-                if (thisPiece.white==true){
-                    int w= 1;
+
+            if (Math.abs(xp - this.xp) != Math.abs(yp - this.yp)) return false;
+
+            int stepX = xp > this.xp ? 1 : -1;
+            int stepY = yp > this.yp ? 1 : -1;
+
+            int cx = this.xp + stepX;
+            int cy = this.yp + stepY;
+
+            while (cx != xp && cy != yp) {
+                if (Board.getPiece(cx * 64, cy * 64) != null) return false;
+                cx += stepX;
+                cy += stepY;
+            }
+
+            Pieces target = Board.getPiece(xp * 64, yp * 64);
+            Pieces block = Board.getPiece(cx * 64, cy * 64);
+            if (block != null) return false;
+
+
+            return true;
+        }
+
+       if (name.equals("Queen")) {
+        if (!withinboard(xp, yp)) return false;
+
+        // rook-like
+        if (xp == this.xp || yp == this.yp) {
+
+            if (xp == this.xp) {
+                int step = yp > this.yp ? 1 : -1;
+                for (int y = this.yp + step; y != yp; y += step) {
+                    if (Board.getPiece(this.xp * 64, y * 64) != null) return false;
                 }
-                else{
-                    int w=0;
+            } else {
+                int step = xp > this.xp ? 1 : -1;
+                for (int x = this.xp + step; x != xp; x += step) {
+                    Pieces block = Board.getPiece(x * 64, this.yp * 64);
+                    if (block != null) return false;
+
                 }
-                Pieces target = Board.getPiece(xp*64,yp*64);
-                
-                if (target != null && target.white == this.white) {
-                    return false;
+            }
+
+            Pieces target = Board.getPiece(xp * 64, yp * 64);
+            if (target != null && target.white == this.white) return false;
+
+            return true;
+        }
+
+            // bishop-like
+            if (Math.abs(xp - this.xp) == Math.abs(yp - this.yp)) {
+
+                int stepX = xp > this.xp ? 1 : -1;
+                int stepY = yp > this.yp ? 1 : -1;
+
+                int cx = this.xp + stepX;
+                int cy = this.yp + stepY;
+
+                while (cx != xp && cy != yp) {
+                    Pieces block = Board.getPiece(cx * 64, cy * 64);
+                    if (block != null) return false;
+
+                    cx += stepX;
+                    cy += stepY;
                 }
 
-                return true;
-            }
+            Pieces target = Board.getPiece(xp * 64, yp * 64);
+            if (target != null && target.white == this.white) return false;
+
+            return true;
+        }
+
             return false;
-        }
-       if (name.equals("Queen")){
-            if (!withinboard(xp, yp)) return false;
-            if(xp == this.xp || yp == this.yp){
-                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
-                if (thisPiece.white==true){
-                    int w= 1;
-                }
-                else{
-                    int w=0;
-                }
-                Pieces target = Board.getPiece(xp*64,yp*64);
-                
-                if (target != null && target.white == this.white) {
-                    return false;
-                }
+        }       
 
-                return true;
-            }
-            if(Math.abs(xp-this.xp) == Math.abs(yp-this.yp)){
-                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
-                if (thisPiece.white==true){
-                    int w= 1;
-                }
-                else{
-                    int w=0;
-                }
-                Pieces target = Board.getPiece(xp*64,yp*64);
-                
-                if (target != null && target.white == this.white) {
-                    return false;
-                }
-
-                return true;
-            }
-        }
        if (name.equals("Pawn")){
             if (!withinboard(xp, yp)) return false;
             int moveValue = white ? -1 :1;
@@ -404,7 +445,7 @@ public class Pieces {
             }
 
 
-
+            
             if (xp == this.xp && yp == this.yp + moveValue && frontPiece == null){
                 return true;
             }
@@ -422,11 +463,35 @@ public class Pieces {
             if(Math.abs(xp-this.xp) == 1 && yp == this.yp + moveValue && target != null && target.white != this.white){
                 return true;
             }
-
         }
-       
        return false;
+      }
+        
+        
+    
+    private boolean isIllegal(Pieces King, int kx, int ky){
+
+    if(King.name.equals("King")){
+        for ( Pieces piece : ps ){
+
+            if(piece != King && piece.white != King.white){
+                if (piece.name.equals("King")) continue;
+                int save = Board.currentPlayer;                     
+                Board.currentPlayer = piece.white ? 1 : 0;          
+
+                boolean attacks = piece.canmove(King.xp,King.yp);
+
+                Board.currentPlayer = save;                         
+
+                if(attacks){
+                    return true;
+                }
+            }
+        }
     }
+    return false;
+}
+
     public boolean withinboard(int xp,int yp){
         if(xp>=0 && xp<=7 && yp>=0 && yp<=7){
             return true;
