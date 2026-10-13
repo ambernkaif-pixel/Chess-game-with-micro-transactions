@@ -19,6 +19,8 @@ public class Pieces {
     boolean white;
     LinkedList <Pieces> ps;
     String name;
+    Pieces checkingP;
+    boolean gameOver;
     boolean hasMoved=false;
     boolean twosteps=false;
     public ArrayList <Pieces> promoPiece = new ArrayList<>();
@@ -66,8 +68,73 @@ public class Pieces {
         return false;
        }
         
-        
-     
+    public boolean kinginCheck() {
+     Pieces King = getKing(true);
+
+     if (King == null) {
+         return false;
+     }
+
+     boolean result = this.canmove(King.xp, King.yp);
+
+//     System.out.println(
+//         name + " " +
+//         (white ? "WHITE" : "BLACK") +
+//         " currentPlayer=" + Board.currentPlayer +
+//         " result=" + result
+//     );
+
+     checkingP = result ? this : null;
+     return result;
+ }
+
+    private Pieces getKing(boolean opponent){
+        Pieces King=null;
+        for (Pieces p: ps){
+            if(opponent){
+               if(p.name.equals("King")&& p.white != this.white){
+                   King=p;
+               }
+            }else{
+                if(p.name.equals("King")&& p.white == this.white){
+                    King = p;
+                }
+            }
+        }
+        return King;
+    }
+    public boolean cancaptureking() {
+
+    Pieces king = getKing(false);
+
+    if (king == null) {
+        return false;
+    }
+
+    for (Pieces p : ps) {
+
+        if (p.white != king.white) {
+
+            int save = Board.currentPlayer;
+            Board.currentPlayer = p.white ? 1 : 0;
+
+            boolean attack = p.canmove(king.xp, king.yp);
+
+            Board.currentPlayer = save;
+
+            if (attack) {
+                System.out.println(
+                    p.name + " attacks king at "
+                    + king.xp + "," + king.yp
+                );
+                return true;
+            }
+            }
+        }
+
+        return false;
+    }
+
     public void promoteTo(Pieces newPiece) {
         // Set board coordinates
         newPiece.xp = this.xp;

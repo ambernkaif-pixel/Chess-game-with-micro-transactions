@@ -133,7 +133,7 @@ public class Board {
             public void mouseReleased(MouseEvent e) {
                 int mx = e.getX();
                 int my = e.getY();
-
+                
                 // PROMOTION MODE
                 if (Board.selectedPiece != null && Board.selectedPiece.promotion) {
 
@@ -147,7 +147,7 @@ public class Board {
                             Board.selectedPiece.promoPiece.clear();
 
                             board.repaint();
-                            return;  // STOP — do NOT move anything
+                            return;  // STOP 
                         }
                     }
 
@@ -159,10 +159,59 @@ public class Board {
                 int yp = my / 64;
 
                 if (selectedPiece != null && selectedPiece.canmove(xp, yp)) {
+
+                    int oldXP = selectedPiece.xp;
+                    int oldYP = selectedPiece.yp;
+
+                    Pieces capturedPiece = getPiece(xp * 64, yp * 64);
+
+                    // SIMULATE
+                    selectedPiece.xp = xp;
+                    selectedPiece.yp = yp;
+
+                    if (capturedPiece != null) {
+                        ps.remove(capturedPiece);
+                    }
+
+                    boolean illegal = selectedPiece.cancaptureking();
+
+                    // RESTORE SIMULATION
+                    selectedPiece.xp = oldXP;
+                    selectedPiece.yp = oldYP;
+
+                    if (capturedPiece != null && !ps.contains(capturedPiece)) {
+                        ps.add(capturedPiece);
+                    }
+
+                    if (illegal) {
+
+                        selectedPiece.x = oldXP * 64;
+                        selectedPiece.y = oldYP * 64;
+
+                        selectedPiece = null;
+
+                        board.repaint();
+                        return;
+                    }
+
+                    // REAL MOVE
                     selectedPiece.move(xp, yp);
-                } else {
+
+                    selectedPiece = null;
+
+                    for (Pieces p : ps) {
+                        if (p.kinginCheck()) {
+                            System.out.println("Check!");
+                            break;
+                        }
+                    }
+
+                } else if (selectedPiece != null) {
+
                     selectedPiece.x = selectedPiece.xp * 64;
                     selectedPiece.y = selectedPiece.yp * 64;
+
+                    selectedPiece = null;
                 }
 
                 board.repaint();
