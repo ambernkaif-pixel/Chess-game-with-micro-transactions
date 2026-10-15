@@ -15,6 +15,8 @@ public class Board {
     public static Pieces enPassantTarget = null;
     public  static LinkedList<Pieces> ps = new LinkedList<>();
     public static Pieces selectedPiece = null;
+    public static boolean gameOver = false;
+    public static String winner = "";
     public static void drawString(Graphics g, String text, int x, int y) {
         g.drawString(text, x, y);
     }
@@ -93,7 +95,28 @@ public class Board {
                     g.drawImage(option.img, option.x, option.y, 64, 64, null);
                     }   
                 }
+                if (Board.gameOver) {
 
+                    g.setColor(new Color(0, 0, 0, 180));
+                    g.fillRect(0, 0, 512, 512);
+
+                    g.setColor(Color.RED);
+                    g.setFont(new Font("Arial", Font.BOLD, 40));
+
+                    FontMetrics fm = g.getFontMetrics();
+
+                    String text = "GAME OVER";
+
+                    int x = (512 - fm.stringWidth(text)) / 2;
+
+                    g.drawString(text, x, 230);
+
+                    g.setFont(new Font("Arial", Font.BOLD, 30));
+
+                    x = (512 - g.getFontMetrics().stringWidth(Board.winner)) / 2;
+
+                    g.drawString(Board.winner, x, 280);
+                }
              
             }
             
@@ -125,14 +148,27 @@ public class Board {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                //System.out.println(getPiece(e.getX(),e.getY()).white?"white"+getPiece(e.getX(),e.getY()).name:"black"+getPiece(e.getX(),e.getY()).name);
+                if(Board.gameOver){
+                    return;
+                }
                 selectedPiece=getPiece(e.getX(),e.getY());
+                selectedPiece = getPiece(e.getX(), e.getY());
+
+                if(selectedPiece != null){
+
+                    if((selectedPiece.white && currentPlayer != 1) ||
+                       (!selectedPiece.white && currentPlayer != 0)){
+
+                        selectedPiece = null;
+                    }
+                }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
                 int mx = e.getX();
                 int my = e.getY();
+                
                 
 //                // PROMOTION MODE
 //                if (Board.selectedPiece != null && Board.selectedPiece.promotion) {
@@ -151,13 +187,12 @@ public class Board {
 //                        }
 //                    }
 //
-//                    return; // ignore clicks outside menu
+//                    return;
 //                }
 
                 // NORMAL MOVE
                 int xp = mx / 64;
                 int yp = my / 64;
-
                 if (selectedPiece != null && selectedPiece.canmove(xp, yp)) {
 
                     int oldXP = selectedPiece.xp;
@@ -213,27 +248,42 @@ public class Board {
                     }
 
                     // REAL MOVE
-                    selectedPiece.move(xp, yp);
+                   selectedPiece.move(xp, yp);
 
-                    selectedPiece = null;
+                   selectedPiece = null;
 
-                    for (Pieces p : ps) {
+                   for (Pieces p : ps) {
                         if (p.kinginCheck()) {
+
                             System.out.println("Check!");
+
+                            if (p.isCheckmate()) {
+
+                                Board.gameOver = true;
+
+                                if (p.white) {
+                                    Board.winner = "WHITE WINS";
+                                } else {
+                                    Board.winner = "BLACK WINS";
+                                }
+
+                                System.out.println("Game Over");
+                            }
+
                             break;
                         }
                     }
 
-                } else if (selectedPiece != null) {
+                    } else if (selectedPiece != null) {
 
-                    selectedPiece.x = selectedPiece.xp * 64;
-                    selectedPiece.y = selectedPiece.yp * 64;
+                        selectedPiece.x = selectedPiece.xp * 64;
+                        selectedPiece.y = selectedPiece.yp * 64;
 
-                    selectedPiece = null;
+                        selectedPiece = null;
+                    }
+
+                    board.repaint();
                 }
-
-                board.repaint();
-            }
 
 
             @Override
