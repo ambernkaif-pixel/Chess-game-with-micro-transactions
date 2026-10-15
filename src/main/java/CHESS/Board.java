@@ -134,25 +134,25 @@ public class Board {
                 int mx = e.getX();
                 int my = e.getY();
                 
-                // PROMOTION MODE
-                if (Board.selectedPiece != null && Board.selectedPiece.promotion) {
-
-                    for (Pieces option : Board.selectedPiece.promoPiece) {
-                        if (mx >= option.x && mx < option.x + 64 &&
-                            my >= option.y && my < option.y + 64) {
-
-                            Board.selectedPiece.promoteTo(option);
-
-                            Board.selectedPiece.promotion = false;
-                            Board.selectedPiece.promoPiece.clear();
-
-                            board.repaint();
-                            return;  // STOP 
-                        }
-                    }
-
-                    return; // ignore clicks outside menu
-                }
+//                // PROMOTION MODE
+//                if (Board.selectedPiece != null && Board.selectedPiece.promotion) {
+//
+//                    for (Pieces option : Board.selectedPiece.promoPiece) {
+//                        if (mx >= option.x && mx < option.x + 64 &&
+//                            my >= option.y && my < option.y + 64) {
+//
+//                            Board.selectedPiece.promoteTo(option);
+//
+//                            Board.selectedPiece.promotion = false;
+//                            Board.selectedPiece.promoPiece.clear();
+//
+//                            board.repaint();
+//                            return;  // STOP 
+//                        }
+//                    }
+//
+//                    return; // ignore clicks outside menu
+//                }
 
                 // NORMAL MOVE
                 int xp = mx / 64;
@@ -165,10 +165,28 @@ public class Board {
 
                     Pieces capturedPiece = getPiece(xp * 64, yp * 64);
 
+                    // En passant simulation
+                    if (capturedPiece == null &&
+                        selectedPiece.name.equals("Pawn") &&
+                        Math.abs(xp - oldXP) == 1) {
+
+                        Pieces epPawn = getPiece(xp * 64, oldYP * 64);
+
+                        if (epPawn != null &&
+                            epPawn == Board.enPassantTarget) {
+
+                            capturedPiece = epPawn;
+                        }
+                    }
+
                     // SIMULATE
                     selectedPiece.xp = xp;
                     selectedPiece.yp = yp;
-
+                    //PIN
+//                    if ( selectedPiece.canmove(xp, yp) && selectedPiece.kinginCheck()){
+//                        selectedPiece.xp = oldXP;
+//                        selectedPiece.yp = oldYP;
+//                    }
                     if (capturedPiece != null) {
                         ps.remove(capturedPiece);
                     }

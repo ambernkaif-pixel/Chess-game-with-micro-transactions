@@ -5,6 +5,7 @@ import static CHESS.Board.ps;
 import java.awt.Image;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Scanner;
 import javax.swing.*;
 
 /**
@@ -22,7 +23,7 @@ public class Pieces {
     Pieces checkingP;
     boolean gameOver;
     boolean hasMoved=false;
-    boolean twosteps=false;
+    //boolean twosteps=false;
     public ArrayList <Pieces> promoPiece = new ArrayList<>();
     public boolean promotion;
     Image img;
@@ -93,7 +94,7 @@ public class Pieces {
         for (Pieces p: ps){
             if(opponent){
                if(p.name.equals("King")&& p.white != this.white){
-                   King=p;
+                   King = p;
                }
             }else{
                 if(p.name.equals("King")&& p.white == this.white){
@@ -114,20 +115,26 @@ public class Pieces {
     for (Pieces p : ps) {
 
         if (p.white != king.white) {
-
+            boolean attack = false;
             int save = Board.currentPlayer;
             Board.currentPlayer = p.white ? 1 : 0;
+            if (p.canmove(king.xp,king.yp)){
+                if (p.white != king.white){
+                    attack = p.canmove(king.xp, king.yp);
+                }
+            }
 
-            boolean attack = p.canmove(king.xp, king.yp);
 
             Board.currentPlayer = save;
 
             if (attack) {
+                if(p.white != king.white){
                 System.out.println(
                     p.name + " attacks king at "
                     + king.xp + "," + king.yp
                 );
                 return true;
+                }
             }
             }
         }
@@ -135,23 +142,30 @@ public class Pieces {
         return false;
     }
 
-    public void promoteTo(Pieces newPiece) {
-        // Set board coordinates
-        newPiece.xp = this.xp;
-        newPiece.yp = this.yp;
+//    public void promoteTo(Pieces option) {
+//
+//        String promotedName = option.name;
+//
+//        int px = this.xp;
+//        int py = this.yp;
+//        boolean color = this.white;
+//
+//        ps.remove(this);
+//
+//        new Pieces(px, py, promotedName, color, ps);
+//
+//        promotion = false;
+//    }
 
-        // Convert board coords → pixel coords
-        newPiece.x = newPiece.xp * 64;
-        newPiece.y = newPiece.yp * 64;
-
-        // Replace pawn with new piece
-        ps.remove(this);
-        ps.add(newPiece);
-
-        promotion = false;
-    }
-
-
+//    private boolean isCheckmate(){
+//        
+//    }
+//    private boolean kingCanMove(Pieces King){
+//        
+//    }
+//    private boolean isValidMove(Pieces King, int xp, int yp){
+//        
+//    }
     public void move(int xp,int yp){
         int oldXP = this.xp;
         int oldYP = this.yp;
@@ -213,16 +227,8 @@ public class Pieces {
                 return;
             }
             }
-        if(Board.getPiece(xp*64,yp*64)!=null){
-            if (Board.getPiece(xp*64,yp*64).white != white){
-            Board.getPiece(xp*64, yp*64).kill();
-            }  
-            else{
-                x=this.xp*64;
-                y=this.yp*64;
-                return;
-            }
-        }
+        
+        
         this.xp=xp;
         this.yp=yp;
         x=xp*64;
@@ -232,24 +238,40 @@ public class Pieces {
         if (canPromote()){
             promotion = true;
         }
-        if (promotion) {
-            promoPiece.clear();
-            Pieces q = new Pieces(-1, -1, "Queen", this.white, new LinkedList<>());
-            q.x = 400; q.y = 50;
+        if (canPromote()) {
 
-            Pieces r = new Pieces(-1, -1, "Rook", this.white, new LinkedList<>());
-            r.x = 400; r.y = 120;
+            Scanner sc = new Scanner(System.in);
 
-            Pieces b = new Pieces(-1, -1, "Bishop", this.white, new LinkedList<>());
-            b.x = 400; b.y = 190;
+            System.out.println("Promote to:");
+            System.out.println("Q - Queen");
+            System.out.println("R - Rook");
+            System.out.println("B - Bishop");
+            System.out.println("N - Knight");
 
-            Pieces k = new Pieces(-1, -1, "Knight", this.white, new LinkedList<>());
-            k.x = 400; k.y = 260;
+            String choice = sc.nextLine().toUpperCase();
 
-            promoPiece.add(q);
-            promoPiece.add(r);
-            promoPiece.add(b);
-            promoPiece.add(k);
+            switch(choice) {
+                case "Q":
+                    name = "Queen";
+                    break;
+
+                case "R":
+                    name = "Rook";
+                    break;
+
+                case "B":
+                    name = "Bishop";
+                    break;
+
+                case "N":
+                    name = "Knight";
+                    break;
+
+                default:
+                    name = "Queen";
+            }
+
+            loadImage();
         }
 
         
@@ -333,23 +355,39 @@ public class Pieces {
 
             // King moves one square in any direction
             if (dx <= 1 && dy <= 1 && !(dx == 0 && dy == 0)) {
-                Pieces thisPiece=Board.getPiece(this.xp*64,this.yp*64);
-                if (thisPiece.white==true){
-                    int w= 1;
-                }
-                else{
-                    int w=0;
-                }
 
-                Pieces target = Board.getPiece(xp * 64, yp * 64);
+            Pieces captured = Board.getPiece(xp * 64, yp * 64);
 
-                // Cannot capture own piece
-                if (target != null && target.white == this.white) {
-                    return false;
-                }
-
-                return true;
+            // own piece
+            if (captured != null && captured.white == this.white) {
+                return false;
             }
+
+            oldXP = this.xp;
+            oldYP = this.yp;
+
+            if (captured != null) {
+                ps.remove(captured);
+            }
+
+            this.xp = xp;
+            this.yp = yp;
+
+            illegal = isIllegal(this, xp, yp);
+
+            this.xp = oldXP;
+            this.yp = oldYP;
+
+            if (captured != null) {
+                ps.add(captured);
+            }
+
+            if (illegal) {
+                return false;
+            }
+
+            return true;
+        }
 
             return false;
         }
@@ -400,9 +438,10 @@ public class Pieces {
 
         
        if (name.equals("Bishop")) {
-            if (!withinboard(xp, yp)) return false;
+            if (name.equals("Bishop")) {
 
-            if (Math.abs(xp - this.xp) != Math.abs(yp - this.yp)) return false;
+            if (Math.abs(xp - this.xp) != Math.abs(yp - this.yp))
+                return false;
 
             int stepX = xp > this.xp ? 1 : -1;
             int stepY = yp > this.yp ? 1 : -1;
@@ -410,18 +449,22 @@ public class Pieces {
             int cx = this.xp + stepX;
             int cy = this.yp + stepY;
 
-            while (cx != xp && cy != yp) {
-                if (Board.getPiece(cx * 64, cy * 64) != null) return false;
+            while (cx != xp) {
+
+                if (Board.getPiece(cx * 64, cy * 64) != null)
+                    return false;
+
                 cx += stepX;
                 cy += stepY;
             }
 
             Pieces target = Board.getPiece(xp * 64, yp * 64);
-            Pieces block = Board.getPiece(cx * 64, cy * 64);
-            if (block != null) return false;
 
+            if (target != null && target.white == this.white)
+                return false;
 
             return true;
+}
         }
 
        if (name.equals("Queen")) {
@@ -490,8 +533,8 @@ public class Pieces {
             else{
                     int w=0;
                 }
-                        // EN PASSANT CHECK
-            if (Board.enPassantTarget != null) {
+            // EN PASSANT CHECK
+            if (Board.enPassantTarget != null && Board.enPassantTarget.white != this.white) {
 
                 // The en-passant pawn must be next to me horizontally
                 if (Board.enPassantTarget.yp == this.yp &&
@@ -548,9 +591,25 @@ public class Pieces {
 
                 boolean attacks = piece.canmove(King.xp,King.yp);
 
-                Board.currentPlayer = save;                         
+                Board.currentPlayer = save;   
+                System.out.println(
+                piece.name +
+                " " + (piece.white ? "WHITE" : "BLACK") +
+                " -> king at " +
+                King.xp + "," + King.yp +
+                " attacks=" + attacks
+                );
 
                 if(attacks){
+                    
+                    System.out.println(
+                        piece.name + " at " +
+                        piece.xp + "," + piece.yp +
+                        " attacks king at " +
+                        King.xp + "," + King.yp
+                    );
+                   
+
                     return true;
                 }
             }
