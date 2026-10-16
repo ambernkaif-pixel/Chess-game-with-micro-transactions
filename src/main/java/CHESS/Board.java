@@ -17,6 +17,7 @@ public class Board {
     public static Pieces selectedPiece = null;
     public static boolean gameOver = false;
     public static String winner = "";
+    public static boolean stalemate= false;
     public static void drawString(Graphics g, String text, int x, int y) {
         g.drawString(text, x, y);
     }
@@ -95,7 +96,7 @@ public class Board {
                     g.drawImage(option.img, option.x, option.y, 64, 64, null);
                     }   
                 }
-                if (Board.gameOver) {
+                if (Board.gameOver && !(Board.stalemate)) {
 
                     g.setColor(new Color(0, 0, 0, 180));
                     g.fillRect(0, 0, 512, 512);
@@ -116,6 +117,20 @@ public class Board {
                     x = (512 - g.getFontMetrics().stringWidth(Board.winner)) / 2;
 
                     g.drawString(Board.winner, x, 280);
+                }
+                if(Board.stalemate){
+                    g.setColor(new Color(0, 0, 0, 180));
+                    g.fillRect(0, 0, 512, 512);
+
+                    g.setColor(Color.RED);
+                    g.setFont(new Font("Arial", Font.BOLD, 30));
+
+                    FontMetrics fm = g.getFontMetrics();
+
+                    String text = "GAME OVER BY STALEMATE";
+                    
+                    int x = (512 - fm.stringWidth(text)) / 2;
+                    g.drawString(text, x, 256);
                 }
              
             }
@@ -271,6 +286,12 @@ public class Board {
                             }
 
                             break;
+                        }
+                        else if(p.name.equals("King")&& p.white==(currentPlayer == 0)&& p.isStalemate()){ 
+                            System.out.println("STALEMATE BLOCK REACHED");
+                            stalemate = true;
+                            Board.gameOver=true;
+                            
                         }
                     }
 

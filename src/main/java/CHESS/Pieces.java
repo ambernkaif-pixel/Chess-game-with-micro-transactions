@@ -24,6 +24,7 @@ public class Pieces {
     boolean gameOver;
     boolean hasMoved=false;
     //boolean twosteps=false;
+    boolean stalemate = false;
     public ArrayList <Pieces> promoPiece = new ArrayList<>();
     public boolean promotion;
     Image img;
@@ -165,22 +166,27 @@ public class Pieces {
 //        promotion = false;
 //    }
 
-    public boolean isCheckmate(){
+        public boolean isCheckmate(){
         System.out.println(
         "isCheckmate called by "
         + name + " "
         + (white ? "WHITE" : "BLACK")
     );
+
         Pieces King = getKing(true);
-            System.out.println(
+
+        System.out.println(
         "Checking mate on "
         + (King.white ? "WHITE" : "BLACK")
         + " king at "
         + King.xp + "," + King.yp
-    );
+        );
+
         int col= King.xp;
         int row = King.yp;
+
         Pieces attacker = null;
+
         for ( Pieces piece : ps ){
             if(!piece.name.equals("King") && piece.white!=King.white){
                 if(piece.canmove(col,row)){
@@ -189,18 +195,20 @@ public class Pieces {
                     Board.currentPlayer = save;
                     boolean attack = piece.canmove(col, row);
 
-                if (attack) {
-                    attacker = piece;
-                    break;
-                    
-                }
+                    if (attack) {
+                        attacker = piece;
+                        break;
+                    }
                 }
             }
         }
+
         if(attacker == null){
             return false;
         }
+
         System.out.println("KING CAN MOVE = " + kingCanMove(King));
+
         if(kingCanMove(King)){
             System.out.println("King can move");
             return false;
@@ -209,52 +217,64 @@ public class Pieces {
             //any piece could block the attack also
             int coldiff = Math.abs(attacker.xp-King.xp);
             int rowdiff = Math.abs(attacker.yp-King.yp);
-            
+
             if (coldiff == 0){
                 //attack from vertical direction
-                if (attacker.yp <row){
+                if (attacker.yp < row){
                     //below the king
                     for (int r = attacker.yp; r < row ;r++){
                         for (Pieces piece : ps){
-                            if(piece!=King && piece.white!= white && piece.canmove(attacker.xp, r)){
+                            if(piece!=King &&
+                               piece.white == King.white &&
+                               piece.canmove(attacker.xp, r)){
                                 return false;
                             }
                         }
                     }
                 }
+
                 if(attacker.yp > row){
                     //above the king
                     for (int r = attacker.yp; r > row ;r--){
                         for (Pieces piece : ps){
-                            if(piece!=King && piece.white!= white && piece.canmove(attacker.xp, r)){
+                            if(piece!=King &&
+                               piece.white == King.white &&
+                               piece.canmove(attacker.xp, r)){
                                 return false;
                             }
                         }
                     }
                 }
             }
+
             else if (rowdiff == 0){
                 // attack from horizontal direction
                 if(attacker.xp < col){
                     //checking from the left
                     for (int c = attacker.xp; c < col ;c++){
                         for (Pieces piece : ps){
-                            if(piece!=King && piece.white!= white && piece.canmove(col,attacker.yp )){
+                            if(piece!=King &&
+                               piece.white == King.white &&
+                               piece.canmove(c,attacker.yp )){
                                 return false;
                             }
                         }
                     }
                 }
-                if(attacker.xp> col){
+
+                if(attacker.xp > col){
                     for (int c = attacker.xp; c > col ;c--){
                         for (Pieces piece : ps){
-                            if(piece!=King && piece.white!= white && piece.canmove(col,attacker.yp )){
+                            if(piece!=King &&
+                               piece.white == King.white &&
+                               piece.canmove(c,attacker.yp )){
                                 return false;
                             }
                         }
                     }
                 }
             }
+
             else if(rowdiff == coldiff){
                 //diagonal attack
                 if(attacker.yp < row){
@@ -263,41 +283,51 @@ public class Pieces {
                         //upper left
                         for  (int c = attacker.xp, r = attacker.yp; c < col;c++,r++){
                             for(Pieces piece : ps){
-                                if(piece != King && piece.white != white && piece.canmove(c,r)){
+                                if(piece != King &&
+                                   piece.white == King.white &&
+                                   piece.canmove(c,r)){
                                     return false;
                                 }
                             }
                         }
                     }
+
                     if(attacker.xp > col){
                         //upper right
                         for  (int c = attacker.xp, r = attacker.yp; c > col; c--,r++){
                             for(Pieces piece : ps){
-                                if(piece != King && piece.white != white && piece.canmove(c,r)){
+                                if(piece != King &&
+                                   piece.white == King.white &&
+                                   piece.canmove(c,r)){
                                     return false;
                                 }
                             }
                         }
-                        
                     }
                 }
+
                 if(attacker.yp > row){
                     // above the king
                     if(attacker.xp < col){
                         //lower left
                         for  (int c = attacker.xp, r = attacker.yp; c < col;c++,r--){
                             for(Pieces piece : ps){
-                                if(piece != King && piece.white != white && piece.canmove(c,r)){
+                                if(piece != King &&
+                                   piece.white == King.white &&
+                                   piece.canmove(c,r)){
                                     return false;
                                 }
                             }
                         }
                     }
+
                     if(attacker.xp > col){
                         //lower right
                         for  (int c=attacker.xp, r = attacker.yp; c > col; c--,r--){
                             for(Pieces piece : ps){
-                                if(piece != King && piece.white != white && piece.canmove(c,r)){
+                                if(piece != King &&
+                                   piece.white == King.white &&
+                                   piece.canmove(c,r)){
                                     return false;
                                 }
                             }
@@ -307,8 +337,15 @@ public class Pieces {
             }
             else{
                 //horsey attack
+                for (Pieces piece : ps) {
+                    if (piece != King && piece.white == King.white &&
+                        piece.canmove(attacker.xp, attacker.yp)) {
+                        return false;
+                    }
+                }
             }
         }
+
         return true;
     }
     private boolean kingCanMove(Pieces King){
@@ -358,6 +395,51 @@ public class Pieces {
         King.yp=oldY;
         
         return isValidMove;
+    }
+    public boolean isStalemate(){
+        int count =0;
+        for (Pieces p : ps){
+            if(p.white != white){
+                count ++;
+            }
+        }
+        System.out.println("count = " + count);
+        Pieces king = getKing(true);
+        boolean move = kingCanMove(king);
+        //if king in check no stalemate
+        for (Pieces p : ps) {
+            if (p.white == white && p.canmove(king.xp, king.yp)) return false;
+        } 
+        
+        //checking any piece except king can move
+        for (Pieces p : ps){
+            if(!(p.name.equals("King")) && p.white == king.white){
+                for (int x=0 ; x<8 ; x++){
+                    for ( int y=0;y<8;y++){
+                        if(p.canmove(x,y)){
+                            System.out.println(
+                            (p.white ? "WHITE " : "BLACK ")
+                            + p.name
+                            + " at "
+                            + p.xp + "," + p.yp
+                            + " can move to "
+                            + x + "," + y
+                        );
+                            return false;
+                        }
+                    }
+                }
+                
+            }
+        }
+        //last check that only king remains
+        
+        if(!move){
+            System.out.println("stalemate detected ");
+            return true;
+            }
+        
+        return false;
     }
     public void move(int xp,int yp){
         int oldXP = this.xp;
@@ -770,32 +852,29 @@ public class Pieces {
         for ( Pieces piece : ps ){
 
             if(piece != King && piece.white != King.white){
-                if (piece.name.equals("King")) continue;
+                if (piece.name.equals("King")) {
+                    if (Math.abs(King.xp - piece.xp) <= 1 &&
+                        Math.abs(King.yp - piece.yp) <= 1) {
+                        return true;   // squares next to the enemy king are illegal
+                    }
+                    continue;
+                }
                 int save = Board.currentPlayer;                     
                 Board.currentPlayer = piece.white ? 1 : 0;          
 
-                boolean attacks = piece.canmove(King.xp,King.yp);
+                boolean attacks;
+                if (piece.name.equals("Pawn")) {
+                    int dir = piece.white ? -1 : 1;
+                    attacks = Math.abs(King.xp - piece.xp) == 1
+                              && King.yp == piece.yp + dir;
+                } else {
+                    attacks = piece.canmove(King.xp, King.yp);
+                }
 
-                Board.currentPlayer = save;   
-//                System.out.println(
-//                piece.name +
-//                " " + (piece.white ? "WHITE" : "BLACK") +
-//                " -> king at " +
-//                King.xp + "," + King.yp +
-//                " attacks=" + attacks
-//                );
+                Board.currentPlayer = save;  
 
-                    if(attacks){
-//                    
-//                    System.out.println(
-//                        piece.name + " at " +
-//                        piece.xp + "," + piece.yp +
-//                        " attacks king at " +
-//                        King.xp + "," + King.yp
-//                    );
-//                   
-//
-                   return true;
+                if(attacks){
+                    return true;
                 }
             }
         }
