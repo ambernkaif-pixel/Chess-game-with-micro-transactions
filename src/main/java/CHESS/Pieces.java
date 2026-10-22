@@ -293,8 +293,19 @@ public class Pieces {
         y = yp * 64;
         hasMoved = true;
 
-        if (name.equals("Pawn")) {
+        if (name.equals("Pawn") && Board.enPassantTarget != null) {
+            Pieces ep = Board.enPassantTarget;
             int moveValue = white ? -1 : 1;
+            if (target == null &&
+                xp == ep.xp &&
+                yp == ep.yp + moveValue &&
+                ep.yp == oldYP &&
+                Math.abs(ep.xp - oldXP) == 1) {
+                ep.kill();
+            }
+        }
+
+        if (name.equals("Pawn")) {
             if (Math.abs(yp - oldYP) == 2) {
                 Board.enPassantTarget = this;
             } else {
@@ -302,18 +313,6 @@ public class Pieces {
             }
         } else {
             Board.enPassantTarget = null;
-        }
-
-        if (name.equals("Pawn") && Board.enPassantTarget != null) {
-            Pieces ep = Board.enPassantTarget;
-            int moveValue = white ? -1 : 1;
-            if (target == null &&
-                xp == ep.xp &&
-                yp == ep.yp + moveValue &&
-                ep.yp == this.yp &&
-                Math.abs(ep.xp - this.xp) == 1) {
-                ep.kill();
-            }
         }
 
         if (canPromote()) promoteGUI();

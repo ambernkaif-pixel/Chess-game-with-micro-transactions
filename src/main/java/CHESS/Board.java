@@ -1,3 +1,4 @@
+
 package CHESS;
 
 import javax.swing.*;
@@ -19,7 +20,6 @@ public class Board extends JPanel {
     public static int whitePoints = 0;
     public static int blackPoints = 0;
 
-    // CHEAT FLAGS
     public static boolean deleteMode = false;
     public static boolean cheatUsedThisTurn = false;
 
@@ -35,6 +35,7 @@ public class Board extends JPanel {
         currentPlayer = 1;
         deleteMode = false;
         cheatUsedThisTurn = false;
+        enPassantTarget = null;
 
         initPieces();
 
@@ -59,10 +60,39 @@ public class Board extends JPanel {
         cheatsButton.setFocusPainted(false);
         cheatsButton.setBackground(new Color(255, 200, 120));
         cheatsButton.addActionListener(e -> openCheatMenu(frame));
-
         sidebar.add(cheatsButton);
-        frame.add(sidebar, BorderLayout.EAST);
 
+        ImageIcon resignIcon = new ImageIcon(Board.class.getResource("/CHESS/Resign.png"));
+        Image scaledResign = resignIcon.getImage().getScaledInstance(260, 60, Image.SCALE_SMOOTH);
+        ImageIcon finalResignIcon = new ImageIcon(scaledResign);
+
+        JButton resignButton = new JButton(finalResignIcon);
+        resignButton.setPreferredSize(new Dimension(260, 60));
+        resignButton.setFocusPainted(false);
+        resignButton.setContentAreaFilled(false);
+        resignButton.setBorder(null);
+        resignButton.setOpaque(false);
+
+        resignButton.addActionListener(e -> {
+            boolean whiteTurn = (currentPlayer == 1);
+
+            if (whiteTurn) {
+                winner = "BLACK WINS (White resigns)";
+            } else {
+                winner = "WHITE WINS (Black resigns)";
+            }
+
+            gameOver = true;
+            deleteMode = false;
+            cheatUsedThisTurn = false;
+
+            JOptionPane.showMessageDialog(frame, "Player resigned.");
+            frame.repaint();
+        });
+
+        sidebar.add(resignButton);
+
+        frame.add(sidebar, BorderLayout.EAST);
         frame.setVisible(true);
 
         frame.addMouseMotionListener(board.motionListener(frame));
@@ -126,13 +156,12 @@ public class Board extends JPanel {
         boolean white = true;
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
-                g2.setColor(white ? Color.white : Color.green.darker());
+                g2.setColor(white ? Color.white.darker() : Color.green.darker());
                 g2.fillRect(x * 64, y * 64, 64, 64);
                 white = !white;
             }
             white = !white;
         }
-        
 
         for (Pieces p : ps) {
             g2.drawImage(p.img, p.x, p.y, 64, 64, null);
@@ -174,8 +203,6 @@ public class Board extends JPanel {
             g2.drawString(text, x, 256);
         }
     }
-
-    //CHEAT MENU 
 
     public static void openCheatMenu(JFrame frame) {
 
@@ -293,10 +320,8 @@ public class Board extends JPanel {
                 int xp = mx / 64;
                 int yp = my / 64;
 
-                // DELETE MODE CLICK HANDLING
                 if (deleteMode) {
 
-                    // snap any dragged piece back to its square
                     if (selectedPiece != null) {
                         selectedPiece.x = selectedPiece.xp * 64;
                         selectedPiece.y = selectedPiece.yp * 64;
@@ -306,7 +331,6 @@ public class Board extends JPanel {
                     Pieces target = (mx < 0 || my < 0) ? null : getPiece(xp * 64, yp * 64);
                     boolean whiteTurn = (currentPlayer == 1);
 
-                    // INVALID TARGET, REFUND + DO NOT END TURN
                     if (target == null || target.name.equals("King") || target.name.equals("Queen")) {
 
                         if (whiteTurn) whitePoints += 20;
@@ -319,14 +343,12 @@ public class Board extends JPanel {
                         return;
                     }
 
-                    // VALID DELETE, REMOVE + END TURN
                     ps.remove(target);
                     JOptionPane.showMessageDialog(frame, "Piece deleted.");
 
                     deleteMode = false;
                     cheatUsedThisTurn = true;
 
-                    // END TURN
                     currentPlayer = whiteTurn ? 0 : 1;
                     cheatUsedThisTurn = false;
 
@@ -339,7 +361,6 @@ public class Board extends JPanel {
                     return;
                 }
 
-                // Dropped off the board or back on the same square , cancel no turn used
                 if (mx < 0 || my < 0 || xp > 7 || yp > 7
                         || (xp == selectedPiece.xp && yp == selectedPiece.yp)) {
                     selectedPiece.x = selectedPiece.xp * 64;
@@ -355,7 +376,6 @@ public class Board extends JPanel {
                     int oldYP = selectedPiece.yp;
                     boolean moverIsWhite = selectedPiece.white;
 
-                    // Simulate the capture (does not award points)
                     Pieces capturedPiece = getPiece(xp * 64, yp * 64);
                     int capturedIndex = -1;
                     if (capturedPiece != null) {
@@ -372,7 +392,6 @@ public class Board extends JPanel {
                     selectedPiece.yp = oldYP;
 
                     if (illegal) {
-                        // restore the captured piece, reject the move
                         if (capturedPiece != null) {
                             ps.add(capturedIndex, capturedPiece);
                         }
@@ -383,7 +402,6 @@ public class Board extends JPanel {
                         return;
                     }
 
-                    // Move is legal, award points
                     if (capturedPiece != null) {
                         int value = 0;
                         if (capturedPiece.name.equals("Pawn")) value = 1;
@@ -399,7 +417,6 @@ public class Board extends JPanel {
                     selectedPiece.move(xp, yp);
                     selectedPiece = null;
 
-                    //Turn logic
                     currentPlayer = moverIsWhite ? 0 : 1;
                     cheatUsedThisTurn = false;
 
