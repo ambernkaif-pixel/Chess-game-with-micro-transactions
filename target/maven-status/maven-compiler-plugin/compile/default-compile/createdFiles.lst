@@ -1,6 +1,8 @@
 CBL.class
 CHESS\Board$1.class
+CHESS\MainMenu$1.class
 CHESS\Board$2.class
 CHESS\Pieces.class
 CHESS\Board.class
-CHESS\Board$3.class
+CHESS\MainMenu.class
+CHESS\Main.class
