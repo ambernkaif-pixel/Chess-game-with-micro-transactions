@@ -287,6 +287,18 @@ public class Pieces {
         if (target != null && target.white != white) target.kill();
         else if (target != null) return;
 
+        // castling: move the rook together with the king
+        if (name.equals("King") && Math.abs(xp - oldXP) == 2 && yp == oldYP) {
+            int dir = xp > oldXP ? 1 : -1;
+            int rookX = (dir == 1) ? 7 : 0;
+            Pieces rook = Board.getPiece(rookX * 64, oldYP * 64);
+            if (rook != null && rook.name.equals("Rook")) {
+                rook.xp = oldXP + dir;
+                rook.x = rook.xp * 64;
+                rook.hasMoved = true;
+            }
+        }
+
         this.xp = xp;
         this.yp = yp;
         x = xp * 64;
@@ -324,12 +336,44 @@ public class Pieces {
         ps.remove(this);
     }
 
+    // Checks all castling conditions for a king moving two squares toward targetX
+    private boolean canCastle(int targetX) {
+        if (hasMoved) return false;
+        int homeRow = white ? 7 : 0;
+        if (this.xp != 4 || this.yp != homeRow) return false;
+
+        int dir = targetX > this.xp ? 1 : -1;
+        int rookX = (dir == 1) ? 7 : 0;
+
+        Pieces rook = Board.getPiece(rookX * 64, this.yp * 64);
+        if (rook == null || !rook.name.equals("Rook")
+                || rook.white != this.white || rook.hasMoved) return false;
+
+        // squares between king and rook must be empty
+        for (int cx = this.xp + dir; cx != rookX; cx += dir) {
+            if (Board.getPiece(cx * 64, this.yp * 64) != null) return false;
+        }
+
+        // king may not castle out of, through, or into check
+        int origX = this.xp;
+        for (int step = 0; step <= 2; step++) {
+            this.xp = origX + dir * step;
+            boolean attacked = isIllegal(this, this.xp, this.yp);
+            this.xp = origX;
+            if (attacked) return false;
+        }
+        return true;
+    }
+
     public boolean canmove(int xp, int yp) {
         if (!withinboard(xp, yp)) return false;
 
         if (name.equals("King")) {
             int dx = Math.abs(xp - this.xp);
             int dy = Math.abs(yp - this.yp);
+
+            // castling: king moves two squares sideways
+            if (dy == 0 && dx == 2) return canCastle(xp);
 
             int oldXP = this.xp;
             int oldYP = this.yp;
